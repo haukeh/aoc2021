@@ -20,11 +20,10 @@ object Day1 {
     println(part2)
   }
 
-  def numOfIncreasingMeasurements(in: List[Long]): Int = {
+  def numOfIncreasingMeasurements(in: List[Long]): Int =
     in.zip(in.tail).foldLeft(0) { case (acc, (l, r)) =>
       if l < r then acc + 1 else acc
     }
-  }
 
   @tailrec
   def recurse(
