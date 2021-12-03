@@ -12,7 +12,6 @@ object Day2 {
 
     println(p1(input))
     println(p2(input))
-
   }
 
   def p1(commands: Seq[Array[String]]): Int = {
