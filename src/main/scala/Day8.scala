@@ -1,13 +1,15 @@
+import scala.collection.mutable
+
 object Day8 {
 
   def main(args: Array[String]): Unit = {
-    val l = readLines("input/day8_ex.txt")
+    val l = readLines("input/day8.txt")
       .map {
         _.trim.split('|')
       }
 
     val pairs = l.map { case Array(l, r) =>
-      l.split(' ').map(_.trim).toList -> r.split(' ').map(_.trim).toList
+      l.trim.split(' ').toList -> r.trim.split(' ').toList
     }
 
     val part1 =
@@ -15,45 +17,85 @@ object Day8 {
 
     println(part1)
 
-    deduce(pairs.take(1).flatMap(_._1))
+    val res = pairs.map { case (input, output) =>
+      val dict = deduce((input ++ output).map(_.toCharArray.toSet).distinct)
+      val digits = output.map { str =>
+        dict(str.toCharArray.toSet)
+      }.mkString
 
-    def deduce(l: List[String]): Map[String, Int] = {
-      val easyValues = l.sortBy(_.length).foldLeft(Map.empty[Int, Set[Char]]) { case (m, elem) =>
+      Integer.parseInt(digits)
+    }
+
+    println(res.sum)
+  }
+
+  def deduce(l: List[Set[Char]]): mutable.Map[Set[Char], Int] = {
+    val easyValues =
+      l.sortBy(_.size).foldLeft(Map.empty[Int, Set[Char]]) { case (m, elem) =>
         elem match {
-          case s if s.length == 2 => m.updated(1, s.toCharArray.toSet)
-          case s if s.length == 3 => m.updated(7, s.toCharArray.toSet)
-          case s if s.length == 4 => m.updated(4, s.toCharArray.toSet)
-          case s if s.length == 7 => m.updated(8, s.toCharArray.toSet)
-          case _ => m
+          case s if s.size == 2 => m.updated(1, s)
+          case s if s.size == 3 => m.updated(7, s)
+          case s if s.size == 4 => m.updated(4, s)
+          case s if s.size == 7 => m.updated(8, s)
+          case _                => m
         }
       }
 
-      println(easyValues(1))
-      println(easyValues(7))
-      println(easyValues(4))
-      println(easyValues(8))
+    val one = easyValues(1)
+    val seven = easyValues(7)
+    val four = easyValues(4)
+    val eight = easyValues(8)
 
-      val topRow = easyValues(7) diff easyValues(1)
+    val topRow = seven diff one
 
-      println(topRow)
+    val m = mutable.Map(
+      one -> 1,
+      four -> 4,
+      seven -> 7,
+      eight -> 8
+    )
 
-      val midAndLeft = easyValues(7) diff easyValues(4)
+    val bottomLeftBottom = eight diff (four | seven)
 
-      val bottomRow = l.drop(4).map(_.toCharArray.toSet).find { i =>
-        (easyValues(7) union easyValues(4)).diff(i).size == 1
-      }.head
-
-      val midRow = l.drop(4).map(_.toCharArray.toSet).find { i =>
-        (easyValues(7) union bottomRow).diff(i).size == 1
+    val nineS = l
+      .filterNot(m.contains)
+      .filter { i =>
+        i.size == 6 && four.intersect(i) == four
       }
 
-      println(topRow)
-      println(midAndLeft)
-      println(midRow)
-      println(bottomRow)
+    val nine = nineS.head
 
-      Map.empty
+    m.put(nine, 9)
+
+    val bottomLeft = eight diff nine
+
+    val sixAndZero = l.filterNot(m.contains).filter { i =>
+      i.size == 6
     }
 
+    val (sixS, zeroS) = sixAndZero.partition(i => !(one.intersect(i) == one))
+
+    val six = sixS.head
+    val zero = zeroS.head
+
+    m.put(six, 6)
+    m.put(zero, 0)
+
+    val fiveS = l.filterNot(m.contains).filter { i =>
+      bottomLeft.intersect(i).isEmpty && one.intersect(i) != one
+    }
+
+    val five = fiveS.head
+
+    m.put(five, 5)
+
+    val (two, three) = l
+      .filterNot(m.contains)
+      .partition(item => item.contains(bottomLeft.head))
+
+    m.put(two.head, 2)
+    m.put(three.head, 3)
+
+    m
   }
 }
