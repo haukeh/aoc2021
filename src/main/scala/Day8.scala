@@ -29,8 +29,7 @@ object Day8 {
   }
 
   def deduceDigitMapping(l: List[Set[Char]]): mutable.Map[Set[Char], Int] = {
-    val one :: seven :: four :: tail = l.sortBy(_.size)
-    val eight = tail.last
+    val one :: seven :: four :: (tail :+ eight) = l.sortBy(_.size)
 
     val m = mutable.Map(
       one -> 1,
