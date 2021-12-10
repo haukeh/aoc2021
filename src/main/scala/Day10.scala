@@ -9,19 +9,23 @@ object Day10 {
     val input =
       readLines("input/day10.txt").map(_.trim).map(_.toCharArray.toList)
 
-    val part1 = input
-      .map(l => parse(l, List.empty))
-      .collect { case Right(Some(badChar)) =>
-        badChar match {
-          case ')' => 3
-          case ']' => 57
-          case '}' => 1197
-          case '>' => 25137
-        }
+    val parsed = input.map(l => parse(l, List.empty))
+
+    val part1 = parsed.collect { case Right(Some(badChar)) =>
+      badChar match {
+        case ')' => 3
+        case ']' => 57
+        case '}' => 1197
+        case '>' => 25137
       }
-      .sum
+    }.sum
 
     println(part1)
+
+    val incomplete = input.filter(parse(_, List.empty).isLeft)
+
+    println(incomplete)
+
   }
 
   @tailrec
@@ -37,33 +41,16 @@ object Day10 {
           case '[' => parse(tail, stack.prepended('['))
           case '<' => parse(tail, stack.prepended('<'))
           case '(' => parse(tail, stack.prepended('('))
-          case '}' =>
+          case c @ ('}' | ']' | '>' | ')') =>
             stack.headOption match {
-              case Some('{')   => parse(tail, stack.tail)
-              case Some(other) => Right(Some(head))
-              case None        => Left(Incomplete)
-            }
-          case ']' =>
-            stack.headOption match {
-              case Some('[')   => parse(tail, stack.tail)
-              case Some(other) => Right(Some(head))
-              case None        => Left(Incomplete)
-            }
-          case '>' =>
-            stack.headOption match {
-              case Some('<')   => parse(tail, stack.tail)
-              case Some(other) => Right(Some(head))
-              case None        => Left(Incomplete)
-            }
-          case ')' =>
-            stack.headOption match {
-              case Some('(')   => parse(tail, stack.tail)
-              case Some(other) => Right(Some(head))
-              case None        => Left(Incomplete)
+              case Some('{') if c == '}' => parse(tail, stack.tail)
+              case Some('[') if c == ']' => parse(tail, stack.tail)
+              case Some('<') if c == '>' => parse(tail, stack.tail)
+              case Some('(') if c == ')' => parse(tail, stack.tail)
+              case Some(other)           => Right(Some(head))
+              case None                  => Left(Incomplete)
             }
         }
     }
-
   }
-
 }
