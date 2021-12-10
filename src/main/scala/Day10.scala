@@ -22,9 +22,25 @@ object Day10 {
 
     println(part1)
 
-    val incomplete = input.filter(parse(_, List.empty).isLeft)
+    val incomplete = input.map(parse(_, List.empty)).collect {
+      case Left(chars) => chars
+    }
 
-    println(incomplete)
+    val completionScores = incomplete.map { l =>
+      val s = l.map {
+        case '(' => 1L
+        case '[' => 2L
+        case '{' => 3L
+        case '<' => 4L
+      }
+      s.foldLeft(0L) { (score, next) =>
+        5L * score + next
+      }
+    }.sorted
+
+    val part2 = completionScores((completionScores.length - 1) / 2)
+
+    println(part2)
 
   }
 
@@ -32,9 +48,9 @@ object Day10 {
   def parse(
       l: List[Char],
       stack: List[Char]
-  ): Either[Incomplete.type, Option[Char]] = {
+  ): Either[List[Char], Option[Char]] = {
     l match {
-      case Nil => if (stack.isEmpty) Right(None) else Left(Incomplete)
+      case Nil => if (stack.isEmpty) Right(None) else Left(stack)
       case head :: tail =>
         head match {
           case '{' => parse(tail, stack.prepended('{'))
@@ -48,7 +64,7 @@ object Day10 {
               case Some('<') if c == '>' => parse(tail, stack.tail)
               case Some('(') if c == ')' => parse(tail, stack.tail)
               case Some(other)           => Right(Some(head))
-              case None                  => Left(Incomplete)
+              case None                  => Left(stack) // ???
             }
         }
     }
