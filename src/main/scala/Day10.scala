@@ -18,20 +18,21 @@ object Day10 {
 
     println(part1)
 
-    val completionScores = input
-      .map(parse(_, List.empty))
-      .collect { case Left(chars) => chars }
-      .map {
-        _.map {
-          case '(' => 1L
-          case '[' => 2L
-          case '{' => 3L
-          case '<' => 4L
-        }.foldLeft(0L) { (score, next) =>
-          5L * score + next
+    val completionScores =
+      input
+        .map(parse(_, List.empty))
+        .collect { case Left(chars) => chars }
+        .map {
+          _.map {
+            case '(' => 1L
+            case '[' => 2L
+            case '{' => 3L
+            case '<' => 4L
+          }.foldLeft(0L) { (score, next) =>
+            5L * score + next
+          }
         }
-      }
-      .sorted
+        .sorted
 
     val part2 = completionScores((completionScores.length - 1) / 2)
 
