@@ -22,7 +22,7 @@ object Day12 {
       }
       .withDefaultValue(Set.empty)
 
-    val s = traverse("start", input, Seq.empty, Seq.empty)
+    val s = traverse("start", input, Seq.empty)
 
     println(s.size)
   }
@@ -31,21 +31,20 @@ object Day12 {
       p: String,
       m: Map[String, Set[String]],
       l: Seq[String],
-      seen: Seq[Seq[String]],
-      double: Option[String] = None
+      twice: Option[String] = None
   ): Iterable[Seq[String]] =
     if (p == "end")
       Seq(l)
     else
       m(p)
         .collect {
-          case s if isUpperCase(s) || !l.contains(s) => s -> double
-          case s if double.contains(s) && l.count(_ == double.get) < 2 =>
-            s -> double
-          case s if l.contains(s) && double.isEmpty => s -> Some(s)
+          case s if isUpperCase(s) || !l.contains(s) => s -> twice
+          case s if twice.exists(t => t == s && l.count(_ == t) < 2) =>
+            s -> twice
+          case s if l.contains(s) && twice.isEmpty => s -> Some(s)
         }
         .flatMap { case (str, double) =>
-          traverse(str, m, l :+ str, seen, double)
+          traverse(str, m, l :+ str, double)
         }
 
   private def isUpperCase(s: String) = s.toCharArray.forall(_.isUpper)
