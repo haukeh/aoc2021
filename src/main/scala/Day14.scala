@@ -1,8 +1,10 @@
-import scala.annotation.tailrec
+import org.graalvm.collections.Pair
+
+import scala.collection.mutable
 
 object Day14 {
   def main(args: Array[String]): Unit = {
-    val input = readLines("input/day14_ex.txt")
+    val input = readLines("input/day14.txt")
 
     val template = input.take(1).head
 
@@ -14,43 +16,31 @@ object Day14 {
       }
       .toMap
 
-    val pairs = template.zip(template.drop(1))
+    val p = template.toCharArray
+      .zip(template.toCharArray.drop(1))
+      .groupBy(identity)
+      .view
+      .mapValues(_.length.toLong)
 
-    @tailrec
-    def loop(input: Array[Char], limit: Int, i: Int = 0): String = {
-      if (i == limit) input.mkString
-      else {
-        val res = expand(input, rules, 0)
-        loop(res.toCharArray, limit, i + 1)
+    val c =
+      template.toCharArray.groupBy(identity).view.mapValues(_.length.toLong)
+
+    val pairs = mutable.Map.from(p).withDefaultValue(0L)
+    val chars = mutable.Map.from(c).withDefaultValue(0L)
+
+    for (_ <- 0 until 40) {
+      pairs.toList.foreach { case (pair, cnt) =>
+        val add = rules(pair)
+        chars(add) += cnt
+        pairs(pair) -= cnt
+        pairs((pair._1, add)) += cnt
+        pairs((add, pair._2)) += cnt
       }
     }
 
-    val res = loop(input.head.toCharArray, 40)
+    val (_, max) = chars.maxBy(_._2)
+    val (_, min) = chars.minBy(_._2)
 
-    val x = res.toCharArray.groupBy(identity).view.mapValues(_.length)
-    val max = x.maxBy(_._2)
-    val min = x.minBy(_._2)
-
-    println(max._2 - min._2)
+    println(max - min)
   }
-
-  @tailrec
-  def expand(
-      template: Array[Char],
-      rules: Map[(Char, Char), Char],
-      pos: Int
-  ): String = {
-    if (pos == template.length - 1) {
-      template.mkString
-    } else {
-      val Array(a, b) = template.slice(pos, pos + 2)
-      val nextT = rules.get((a, b)).fold(template) { newChar =>
-        val (head, tail) = template.splitAt(pos + 1)
-        val next = head ++ Array(newChar) ++ tail
-        next
-      }
-      expand(nextT, rules, pos + 2)
-    }
-  }
-
 }
