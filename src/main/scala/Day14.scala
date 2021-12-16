@@ -1,5 +1,3 @@
-import org.graalvm.collections.Pair
-
 import scala.collection.mutable
 
 object Day14 {
