@@ -1,9 +1,9 @@
 import scala.collection.mutable
 
-case class State(cost: Int, position: (Int, Int))
+case class Dist(cost: Int, position: (Int, Int))
 
-object State {
-  implicit val ord: Ordering[State] = Ordering.by(-_.cost)
+object Dist {
+  implicit val ord: Ordering[Dist] = Ordering.by(-_.cost)
 }
 
 object Day15 {
@@ -35,21 +35,21 @@ object Day15 {
 
     val distances: mutable.Map[(Int, Int), Long] =
       mutable.Map().withDefaultValue(Long.MaxValue)
-    val queue = mutable.PriorityQueue.empty[State]
+    val queue = mutable.PriorityQueue.empty[Dist]
 
     distances((0, 0)) = 0
-    queue.enqueue(State(0, (0, 0)))
+    queue.enqueue(Dist(0, (0, 0)))
 
     var goal: Option[Int] = None
 
     while (queue.nonEmpty && goal.isEmpty) {
-      val State(cost, position) = queue.dequeue()
+      val Dist(cost, position) = queue.dequeue()
 
       if (position == target) goal = Some(cost)
 
       if (cost <= distances(position)) {
         for (neighbour <- vertices(position)._2) {
-          val next = State(cost + neighbour._2, neighbour._1)
+          val next = Dist(cost + neighbour._2, neighbour._1)
 
           if (next.cost < distances(next.position)) {
             queue.enqueue(next)

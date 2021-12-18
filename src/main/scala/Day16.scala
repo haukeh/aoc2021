@@ -1,35 +1,49 @@
+import cats.data.State
+
 import scala.annotation.tailrec
 import scala.collection.BitSet
 
 object Day16 {
+
+  case class Header(version: Int, typeID: Int)
 
   def main(args: Array[String]): Unit = {
     val input = readLines("input/day16_ex.txt").head.trim
 
     val bits = BigInt(input, 16).toString(2)
 
-    val version = Integer.parseInt(bits.take(3), 2)
-    val t = Integer.parseInt(bits.take(3), 2)
+    val parseHeader: State[String, Header] = for {
+      version <- parseVersion
+      typeID <- parseTypeId
+    } yield Header(version, typeID)
 
-    val num = parseLiteralNumber(bits.drop(6))
+    parseHeader.flatMap {
 
-    println(num)
+    }
+
+
   }
 
-  def parseLiteralNumber(str: String): Long = {
+  val parseVersion: State[String, Int] = parseDigits(3)
+
+  val parseTypeId: State[String, Int] = parseDigits(3)
+
+  def parseDigits(num: Int): State[String, Int] = State(str => (str.drop(num), Integer.parseInt(str.take(num), 2)))
+
+  val parseLiteralValue: State[String, Int] = State { str =>
     @tailrec
-    def take(str: String, acc: Seq[String]): Seq[String] = {
+    def take(str: String, acc: Seq[String]): (Seq[String], String) = {
       if (str.length < 5) {
-        acc
+        (acc, str)
       } else if (str.startsWith("1")) {
         take(str.drop(5), acc.appended(str.slice(1, 5)))
       } else {
-        acc.appended(str.slice(1, 5))
+        (acc.appended(str.slice(1, 5)), str)
       }
     }
 
-    val nums = take(str, Seq.empty).mkString
+    val (nums, tail) = take(str, Seq.empty)
 
-    Integer.parseInt(nums, 2)
+    (tail, Integer.parseInt(nums.mkString, 2))
   }
 }
