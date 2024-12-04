@@ -10,14 +10,14 @@ object Day11 {
         row.zipWithIndex.map { case (c, x) => (y, x) -> c.asDigit }
       }
 
-    val m1: mutable.Map[(Int, Int), Int] = mutable.Map(input: _*)
+    val m1: mutable.Map[(Int, Int), Int] = mutable.Map(input*)
 
     val part1 = (for (_ <- 1 to 100) yield step(m1).size).sum
     println(part1)
 
     var rounds = 0
     var allFlashed = false
-    val m2: mutable.Map[(Int, Int), Int] = mutable.Map(input: _*)
+    val m2: mutable.Map[(Int, Int), Int] = mutable.Map(input*)
 
     while (!allFlashed) {
       val next = step(m2)
